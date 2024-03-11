@@ -1,7 +1,7 @@
 import pandas as pd
 from dateutil.parser import parse
 
-def infer_test(df):
+def majority_infer(df):
     empty_strings = set(["", "?", "none", "no", "-", "undefined", "not available"])
     typo_rate_threshold = 0.05
     category_rate_threshold = 0.5
@@ -78,5 +78,5 @@ def infer_test(df):
     return df
 
 df = pd.read_csv('sample_data.csv')
-df = infer_test(df)
+df = majority_infer(df)
 # print(df.dtypes)
