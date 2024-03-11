@@ -1,32 +1,82 @@
 import pandas as pd
+from dateutil.parser import parse
 
-def infer_and_convert_data_types(df):
-    for col in df.columns:
-        # Attempt to convert to numeric first
-        df_converted = pd.to_numeric(df[col], errors='coerce')
-        if not df_converted.isna().all():  # If at least one value is numeric
-            df[col] = df_converted
-            continue
+def infer_test(df):
+    empty_strings = set(["", "?", "none", "no", "-", "undefined", "not available"])
+    typo_rate_threshold = 0.05
+    category_rate_threshold = 0.5
 
-        # Attempt to convert to datetime
+    def get_init_types() -> dict :
+        return {
+            'int': 0,
+            'float': 0,
+            'bool': 0,
+            'datetime': 0,
+            'object': 0
+        }
+
+    def is_empty(cell: str) -> bool:
         try:
-            df[col] = pd.to_datetime(df[col])
-            continue
-        except (ValueError, TypeError):
-            pass
+            return cell.strip().lower() in empty_strings
+        except (ValueError, AttributeError):
+            return False
+    
+    def is_int(cell: str) -> bool:
+        try:
+            return cell.isdigit()
+        except (ValueError, AttributeError):
+            return False
+    
+    def is_float(cell: str) -> bool:
+        try:
+            float(cell)
+            return True
+        except (ValueError, AttributeError):
+            return False
+    
+    def is_datetime(cell: str) -> bool:
+        try: 
+            parse(cell)
+            return True
+        except (ValueError, AttributeError):
+            return False
+    
+    def is_bool(cell: str) -> bool:
+        return cell == "True" or cell == "true" or cell == "False" or cell == "false"
 
-        # Check if the column should be categorical
-        if len(df[col].unique()) / len(df[col]) < 0.5:  # Example threshold for categorization
-            df[col] = pd.Categorical(df[col])
+    for col in df.columns:
+        column = [cell for cell in df[col] if is_empty(cell) == False]
+
+        types = get_init_types()
+        for cell in column :
+            if is_int(cell) :
+                types["int"] += 1
+            elif is_float(cell) :
+                types["float"] += 1
+            elif is_bool(cell) :
+                types["bool"] += 1
+            elif is_datetime(cell) :
+                types["datetime"] += 1
+            else :
+                types["object"] += 1
+        
+        major_types = [key for (key, value) in types.items() if value/len(column) > typo_rate_threshold]
+        if "object" in major_types or (len(major_types) >= 2 and not (len(major_types) == 2 and "int" in major_types and "float" in major_types)):
+            if len(list(set(column))) / len(column) < category_rate_threshold :
+                print(f"{col}: category")
+            else :
+                print(f"{col}: object")
+        elif "float" in major_types :
+            print(f"{col}: float")
+        elif "int" in major_types :
+            print(f"{col}: int")
+        elif "bool" in major_types :
+            print(f"{col}: bool")
+        elif "datetime" in major_types :
+            print(f"{col}: datetime")
 
     return df
 
-# Test the function with your DataFrame
 df = pd.read_csv('sample_data.csv')
-print("Data types before inference:")
-print(df.dtypes)
-
-df = infer_and_convert_data_types(df)
-
-print("\nData types after inference:")
-print(df.dtypes)
+df = infer_test(df)
+# print(df.dtypes)
