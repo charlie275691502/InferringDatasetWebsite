@@ -8,6 +8,7 @@ pandas = "*"
 python-dateutil = "*"
 django = "*"
 djangorestframework = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 
