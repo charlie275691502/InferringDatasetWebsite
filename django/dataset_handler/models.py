@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class Dataset(models.Model):
-    csv_path = models.CharField(max_length=255)
+    csv = models.FileField(upload_to='')
 
 class DatasetColumnType(models.Model):
     TYPE_INT = "I"
