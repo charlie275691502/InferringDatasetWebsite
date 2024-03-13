@@ -4,7 +4,7 @@ from django.db import models
 class Dataset(models.Model):
     csv = models.FileField(upload_to='')
 
-class DatasetColumnType(models.Model):
+class DatasetColumn(models.Model):
     TYPE_INT = "I"
     TYPE_FLOAT = "F"
     TYPE_BOOL = "B"
@@ -20,5 +20,6 @@ class DatasetColumnType(models.Model):
         (TYPE_TEXT, "Text"),
     ]
     column_index = models.IntegerField()
+    name = models.CharField(max_length=255)
     type = models.CharField(max_length=1, choices=TYPE_CHOICES, default=TYPE_TEXT)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name='column_types')
