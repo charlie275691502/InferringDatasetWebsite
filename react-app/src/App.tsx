@@ -2,63 +2,48 @@ import Button from "./components/Button";
 import axios from "axios";
 import DatasetTable from "./components/DatasetTable";
 import { Data } from "./components/DatasetTable";
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import FileUpload from "./components/FileUpload";
+import { GetRequest, PostRequest, PutRequest } from "./modules/Request";
 
 function App() {
+  const domain = "http://127.0.0.1:9000";
   let [data, setData] = useState<Data | null>(null);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  const request = () => {
-    axios
-      .get("http://127.0.0.1:9000/dataset_handler/datasets/22")
-      .then((response) => {
-        console.log(response.data);
-        setData(response.data);
-      })
-      .catch((error) => {
-        console.log("Error:", error);
-      });
-  };
+  const getPreviewDatasets = (dataset_id: number) =>
+    GetRequest(
+      `${domain}/dataset_handler/datasets/${dataset_id}/`,
+      (response) => setData(response)
+    );
 
-  const csvUpload = (file: File) => {
-    const formData = new FormData();
-    formData.append("csv", file, file.name);
-    axios
-      .post("http://127.0.0.1:9000/dataset_handler/datasets/upload/", formData)
-      .then((response) => {
-        console.log(response.data);
-        setData(response.data);
-      });
-  };
+  const csvUpload = (file: File) =>
+    PostRequest(
+      `${domain}/dataset_handler/datasets/upload/`,
+      { csv: file },
+      (response) => setData(response)
+    );
 
   const onDropdownElementSelect = (
     dataset_id: number,
     column_id: number,
     element: string
-  ) => {
-    const formData = new FormData();
-    formData.append("type", element);
-    axios
-      .put(
-        `http://127.0.0.1:9000/dataset_handler/datasets/${dataset_id}/columns/${column_id}/`,
-        formData
-      )
-      .then((response) => {
-        let newData = structuredClone(data);
-        let columns = data?.columns;
-        let column = columns?.find((column) => column.id == response.data.id);
-        if (column) column.type = response.data.type;
-        if (newData && columns) newData.columns = columns;
-        console.log(newData);
-        setData(newData);
-      });
-  };
+  ) =>
+    PutRequest(
+      `${domain}/dataset_handler/datasets/${dataset_id}/columns/${column_id}/`,
+      { type: element },
+      (response) => {
+        let column = data?.columns?.find((column) => column.id == response.id);
+        if (column) column.type = response.type;
+        forceUpdate();
+      }
+    );
 
   return (
     <div>
       <FileUpload onUpload={csvUpload} />
       {/* <Button text="Download" onClickButton={request} /> */}
-      <Button text="Cheating" onClickButton={request} />
+      <Button text="Cheating" onClickButton={() => getPreviewDatasets(22)} />
       {data && (
         <DatasetTable
           data={data}
