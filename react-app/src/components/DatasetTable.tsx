@@ -1,16 +1,17 @@
 import React, { useState } from "react";
+import Dropdown from "./Dropdown";
 
 interface Column {
-  index: Number;
-  name: String;
-  type: String;
+  index: number;
+  name: string;
+  type: string;
 }
 
 interface Data {
-  id: Number;
-  file_name: String;
-  columns: [Column];
-  datas: [[object]];
+  id: number;
+  file_name: string;
+  columns: Column[];
+  datas: object[][];
 }
 
 interface Props {
@@ -18,50 +19,16 @@ interface Props {
 }
 
 const DatasetTable = ({ data }: Props) => {
-  let [selectedIndex, setSelectedIndex] = useState<Number>(-1);
   let [selectedType, setSelectedType] = useState("");
 
-  const types = ["Integer", "Float", "Boolean", "Datetime", "Category", "Text"];
-  let dropdown = (
-    type: String,
-    isShowing: Boolean,
-    onDropdownClick: () => void
-  ) => {
-    const menuClass = isShowing ? "dropdown-menu show" : "dropdown-menu";
-    return (
-      <div className="dropdown">
-        <button
-          className="btn btn-secondary dropdown-toggle"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-          onClick={onDropdownClick}
-        >
-          {type}
-        </button>
-        <ul className={menuClass}>
-          {types.map((t, index) => (
-            <li key={index}>
-              <a
-                className="dropdown-item"
-                href="#"
-                onClick={() => {
-                  console.log("Hi");
-                }}
-              >
-                {t}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  };
-
-  let onDropdownClick = (index: Number) => {
-    if (selectedIndex == index) setSelectedIndex(-1);
-    else setSelectedIndex(index);
-  };
+  const elements = [
+    "Integer",
+    "Float",
+    "Boolean",
+    "Datetime",
+    "Category",
+    "Text",
+  ];
 
   return (
     <>
@@ -80,9 +47,13 @@ const DatasetTable = ({ data }: Props) => {
             <th scope="col" key="-"></th>
             {data.columns.map((column, index) => (
               <th scope="col" key={index}>
-                {dropdown(column.type, selectedIndex == index, () =>
-                  onDropdownClick(index)
-                )}
+                {
+                  <Dropdown
+                    elements={elements}
+                    selectedElement={column.type}
+                    onElementSelect={(element: string) => console.log(element)}
+                  />
+                }
               </th>
             ))}
           </tr>
