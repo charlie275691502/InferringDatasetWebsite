@@ -1,5 +1,5 @@
 import Button from "./components/Button";
-import axios from "axios";
+import fileDownload from "js-file-download";
 import DatasetTable from "./components/DatasetTable";
 import { Data } from "./components/DatasetTable";
 import { useReducer, useState } from "react";
@@ -24,6 +24,12 @@ function App() {
       (response) => setData(response)
     );
 
+  const csvDownload = (dataset_id: number) =>
+    GetRequest(
+      `${domain}/dataset_handler/datasets/download/${dataset_id}/`,
+      (response) => fileDownload(response.csv, response.file_name)
+    );
+
   const onDropdownElementSelect = (
     dataset_id: number,
     column_id: number,
@@ -42,7 +48,7 @@ function App() {
   return (
     <div>
       <FileUpload onUpload={csvUpload} />
-      {/* <Button text="Download" onClickButton={request} /> */}
+      <Button text="Download" onClickButton={() => csvDownload(22)} />
       <Button text="Cheating" onClickButton={() => getPreviewDatasets(22)} />
       {data && (
         <DatasetTable

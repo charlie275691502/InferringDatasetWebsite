@@ -45,6 +45,11 @@ class DatasetSerializer(serializers.ModelSerializer):
         fields = ['id', 'file_name', 'columns', 'datas', 'csv']
 
 class DatasetDownloadSerializer(serializers.ModelSerializer):
+    file_name = serializers.SerializerMethodField(read_only=True, method_name='get_file_name')
+    
+    def get_file_name(self, dataset: Dataset):
+        return os.path.basename(dataset.csv.path)
+    
     class Meta:
         model = Dataset
-        fields = ['id', 'csv']
+        fields = ['id', 'file_name', 'csv']
