@@ -24,24 +24,32 @@ const DatasetTable = ({ data }: Props) => {
       <table className="table">
         <thead>
           <tr>
-            <th scope="col">#</th>
-            {data.columns.map((column) => (
-              <th scope="col">{column.name}</th>
+            <th scope="col" key="-">
+              #
+            </th>
+            {data.columns.map((column, index) => (
+              <th scope="col" key={index}>
+                {column.name}
+              </th>
             ))}
           </tr>
-          <tr>
-            <th scope="col">#</th>
-            {data.columns.map((column) => (
-              <th scope="col">{column.type}</th>
+          <tr key="1">
+            <th scope="col" key="-">
+              #
+            </th>
+            {data.columns.map((column, index) => (
+              <th scope="col" key={index}>
+                {column.type}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {data.datas.map((row, index) => (
-            <tr>
+            <tr key={index}>
               <th scope="row">{(index + 1).toString()}</th>
-              {row.map((cell) => (
-                <td>{String(cell)}</td>
+              {row.map((cell, jndex) => (
+                <td key={jndex}>{String(cell)}</td>
               ))}
             </tr>
           ))}
