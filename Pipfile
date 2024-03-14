@@ -10,6 +10,7 @@ django = "*"
 djangorestframework = "*"
 django-cors-headers = "*"
 drf-nested-routers = "*"
+xlrd = "*"
 
 [dev-packages]
 

@@ -2,7 +2,16 @@ from django.db import models
 
 # Create your models here.
 class Dataset(models.Model):
-    csv = models.FileField(upload_to='')
+    EXTENSION_EMPTY = "nil"
+    EXTENSION_CSV = "csv"
+    EXTENSION_XLS = "xls"
+    EXTENSION_CHOICES = [
+        (EXTENSION_EMPTY, EXTENSION_EMPTY),
+        (EXTENSION_CSV, EXTENSION_CSV),
+        (EXTENSION_XLS, EXTENSION_XLS),
+    ]
+    raw_file = models.FileField(upload_to='')
+    extension = models.CharField(max_length=3, choices=EXTENSION_CHOICES, default=EXTENSION_EMPTY)
 
 class DatasetColumn(models.Model):
     TYPE_INT = "I"

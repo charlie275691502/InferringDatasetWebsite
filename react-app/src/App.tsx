@@ -48,8 +48,8 @@ function App() {
   return (
     <div>
       <FileUpload onUpload={csvUpload} />
-      <Button text="Download" onClickButton={() => csvDownload(22)} />
-      <Button text="Cheating" onClickButton={() => getPreviewDatasets(22)} />
+      <Button text="Download" onClickButton={() => csvDownload(3)} />
+      <Button text="Cheating" onClickButton={() => getPreviewDatasets(3)} />
       {data && (
         <DatasetTable
           data={data}
