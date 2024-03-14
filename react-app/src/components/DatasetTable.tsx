@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import Dropdown from "./Dropdown";
 
-interface Column {
+export interface Column {
+  id: number;
   index: number;
   name: string;
   type: string;
 }
 
-interface Data {
+export interface Data {
   id: number;
   file_name: string;
   columns: Column[];
@@ -16,11 +17,14 @@ interface Data {
 
 interface Props {
   data: Data;
+  onDropdownElementSelect: (
+    dataset_id: number,
+    column_id: number,
+    element: string
+  ) => void;
 }
 
-const DatasetTable = ({ data }: Props) => {
-  let [selectedType, setSelectedType] = useState("");
-
+const DatasetTable = ({ data, onDropdownElementSelect }: Props) => {
   const elements = [
     "Integer",
     "Float",
@@ -51,7 +55,9 @@ const DatasetTable = ({ data }: Props) => {
                   <Dropdown
                     elements={elements}
                     selectedElement={column.type}
-                    onElementSelect={(element: string) => console.log(element)}
+                    onElementSelect={(element: string) =>
+                      onDropdownElementSelect(data.id, column.id, element)
+                    }
                   />
                 }
               </th>

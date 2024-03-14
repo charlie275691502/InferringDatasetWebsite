@@ -11,7 +11,7 @@ class DatasetColumnSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DatasetColumn
-        fields = ['index', 'name', 'type']
+        fields = ['id', 'index', 'name', 'type']
 
     def update(self, instance, validated_data):
         validated_data['type'] = {value: key for key, value in DatasetColumn.TYPE_CHOICES}.get(validated_data['get_type_display'], DatasetColumn.TYPE_INT)
