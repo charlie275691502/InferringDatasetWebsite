@@ -19,7 +19,7 @@ class DatasetColumn(models.Model):
         (TYPE_CATEGORY, "Category"),
         (TYPE_TEXT, "Text"),
     ]
-    column_index = models.IntegerField()
+    index = models.IntegerField()
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=1, choices=TYPE_CHOICES, default=TYPE_TEXT)
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name='column_types')
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name='columns')
