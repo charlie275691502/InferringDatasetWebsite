@@ -1,11 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import DatasetViewSet, DatasetDownloadViewSet
+from rest_framework_nested import routers
+from .views import DatasetViewSet, DatasetUploadViewSet, DatasetDownloadViewSet, DatasetColumnViewSet
 
-router = DefaultRouter()
-router.register('datasets/preview', DatasetViewSet, basename = 'dataset')
-router.register('datasets/download', DatasetDownloadViewSet, basename = 'dataset')
+router = routers.DefaultRouter()
+router.register('datasets/upload', DatasetUploadViewSet, basename = 'dataset-upload')
+router.register('datasets/download', DatasetDownloadViewSet, basename = 'dataset-download')
 
-urlpatterns = [
-    path('', include(router.urls)),
-]
+router.register('datasets', DatasetViewSet)
+columns_router = routers.NestedDefaultRouter(router, 'datasets', lookup='dataset')
+columns_router.register('columns', DatasetColumnViewSet, basename='dataset-columns')
+
+urlpatterns = router.urls + columns_router.urls

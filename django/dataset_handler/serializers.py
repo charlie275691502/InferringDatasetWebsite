@@ -5,11 +5,18 @@ import pandas as pd
 import os
 
 class DatasetColumnSerializer(serializers.ModelSerializer):
+    index = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
     type = serializers.CharField(source='get_type_display')
 
     class Meta:
         model = DatasetColumn
         fields = ['index', 'name', 'type']
+
+    def update(self, instance, validated_data):
+        validated_data['type'] = {value: key for key, value in DatasetColumn.TYPE_CHOICES}.get(validated_data['get_type_display'], DatasetColumn.TYPE_INT)
+        return super().update(instance, validated_data)
+
 
 class DatasetSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField(read_only=True, method_name='get_file_name')
