@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ClickOutsideAlerter from "./ClickOutsideAlerter";
 
 interface Props {
   elements: string[];
@@ -9,9 +10,11 @@ interface Props {
 const Dropdown = ({ elements, selectedElement, onElementSelect }: Props) => {
   let [isListShow, setIsListShow] = useState(false);
 
+  const ref = ClickOutsideAlerter(() => setIsListShow(false));
+
   const menuClass = isListShow ? "dropdown-menu show" : "dropdown-menu";
   return (
-    <div className="dropdown">
+    <div className="dropdown" ref={ref}>
       <button
         className="btn btn-secondary dropdown-toggle"
         type="button"
