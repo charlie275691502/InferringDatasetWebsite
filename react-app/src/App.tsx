@@ -1,10 +1,14 @@
 import Button from "./components/Button";
-import fileDownload from "js-file-download";
 import DatasetTable from "./components/DatasetTable";
 import { Data } from "./components/DatasetTable";
 import { useReducer, useState } from "react";
 import FileUpload from "./components/FileUpload";
-import { GetRequest, PostRequest, PutRequest } from "./modules/Request";
+import {
+  FileDownload,
+  GetRequest,
+  PostRequest,
+  PutRequest,
+} from "./modules/Request";
 
 function App() {
   const domain = "http://127.0.0.1:9000";
@@ -17,20 +21,20 @@ function App() {
       (response) => setData(response)
     );
 
-  const csvUpload = (file: File) =>
+  const uploadFile = (file: File) =>
     PostRequest(
       `${domain}/dataset_handler/datasets/upload/`,
-      { csv: file },
+      { raw_file: file },
       (response) => setData(response)
     );
 
-  const csvDownload = (dataset_id: number) =>
+  const downloadFile = (dataset_id: number) =>
     GetRequest(
       `${domain}/dataset_handler/datasets/download/${dataset_id}/`,
-      (response) => fileDownload(response.csv, response.file_name)
+      (response) => FileDownload(response.raw_file, response.file_name)
     );
 
-  const onDropdownElementSelect = (
+  const selectDropdownElement = (
     dataset_id: number,
     column_id: number,
     element: string
@@ -47,13 +51,13 @@ function App() {
 
   return (
     <div>
-      <FileUpload onUpload={csvUpload} />
-      <Button text="Download" onClickButton={() => csvDownload(3)} />
-      <Button text="Cheating" onClickButton={() => getPreviewDatasets(3)} />
+      <FileUpload onUpload={uploadFile} />
+      <Button text="Download" onClickButton={() => downloadFile(4)} />
+      <Button text="Cheating" onClickButton={() => getPreviewDatasets(4)} />
       {data && (
         <DatasetTable
           data={data}
-          onDropdownElementSelect={onDropdownElementSelect}
+          onDropdownElementSelect={selectDropdownElement}
         />
       )}
     </div>
