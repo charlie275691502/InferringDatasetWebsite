@@ -24,21 +24,24 @@ class DatasetSerializer(serializers.ModelSerializer):
     columns = DatasetColumnSerializer(read_only=True, many=True)
     datas = serializers.SerializerMethodField(read_only=True, method_name='get_data')
     raw_file = serializers.FileField(write_only=True)
-    extension = serializers.CharField(read_only=True)
+
+    def read_file(self, fileName: str) -> pd.DataFrame :
+        extension = pathlib.Path(fileName).suffix[1:]
+        if extension == "csv" :
+            return pd.read_csv(fileName)
+        elif extension == "xls" or extension != "xlsx" :
+            return pd.read_excel(fileName)
+
 
     def create(self, validated_data):
         raw_file = validated_data['raw_file']
         extension = pathlib.Path(raw_file.name).suffix[1:]
-        if extension != Dataset.EXTENSION_CSV and extension != Dataset.EXTENSION_XLS :
+        if extension != "csv" and extension != "xls" and extension != "xlsx" :
             return
         
-        validated_data['extension'] = extension
         dataset = super().create(validated_data)
 
-        if dataset.extension == Dataset.EXTENSION_CSV :
-            df = pd.read_csv(dataset.raw_file.path)
-        elif dataset.extension == Dataset.EXTENSION_XLS :
-            df = pd.read_excel(dataset.raw_file.path)
+        df = self.read_file(dataset.raw_file.path)
         
         types = get_names_and_types(df)
         for idx, (name, type) in enumerate(types) :
@@ -49,18 +52,11 @@ class DatasetSerializer(serializers.ModelSerializer):
         return os.path.basename(dataset.raw_file.path)
     
     def get_data(self, dataset: Dataset):
-        if dataset.extension == Dataset.EXTENSION_CSV :
-            df = pd.read_csv(dataset.raw_file.path)
-        elif dataset.extension == Dataset.EXTENSION_XLS :
-            df = pd.read_excel(dataset.raw_file.path)
-        else :
-            return
-        
-        return df.values.tolist()
+        return self.read_file(dataset.raw_file.path).values.tolist()
 
     class Meta:
         model = Dataset
-        fields = ['id', 'file_name', 'extension', 'columns', 'datas', 'raw_file']
+        fields = ['id', 'file_name', 'columns', 'datas', 'raw_file']
 
 class DatasetDownloadSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField(read_only=True, method_name='get_file_name')

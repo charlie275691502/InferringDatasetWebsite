@@ -52,8 +52,8 @@ function App() {
   return (
     <div>
       <FileUpload onUpload={uploadFile} />
-      <Button text="Download" onClickButton={() => downloadFile(4)} />
-      <Button text="Cheating" onClickButton={() => getPreviewDatasets(4)} />
+      <Button text="Download" onClickButton={() => downloadFile(14)} />
+      <Button text="Cheating" onClickButton={() => getPreviewDatasets(14)} />
       {data && (
         <DatasetTable
           data={data}
