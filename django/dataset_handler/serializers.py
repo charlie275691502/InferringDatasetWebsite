@@ -28,9 +28,10 @@ class DatasetSerializer(serializers.ModelSerializer):
     def read_file(self, fileName: str) -> pd.DataFrame :
         extension = pathlib.Path(fileName).suffix[1:]
         if extension == "csv" :
-            return pd.read_csv(fileName)
-        elif extension == "xls" or extension != "xlsx" :
-            return pd.read_excel(fileName)
+            df = pd.read_csv(fileName, dtype="string")
+        elif extension == "xls" or extension == "xlsx" :
+            df = pd.read_excel(fileName, dtype="string")
+        return df.fillna('')
 
 
     def create(self, validated_data):
