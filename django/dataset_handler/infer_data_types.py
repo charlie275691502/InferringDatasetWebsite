@@ -1,3 +1,4 @@
+import datetime
 import pandas as pd
 from dateutil.parser import parse
 from .models import DatasetColumn
@@ -25,7 +26,8 @@ def majority_infer(
     
     def is_int(cell: str) -> bool:
         try:
-            return cell.isdigit()
+            int(cell)
+            return True
         except (ValueError, AttributeError):
             return False
     
@@ -50,16 +52,24 @@ def majority_infer(
         column = [cell for cell in series if is_empty(cell) == False]
         types = get_init_types()
         for cell in column :
-            if is_int(cell) :
-                types["int"] += 1
-            elif is_float(cell) :
-                types["float"] += 1
-            elif is_bool(cell) :
-                types["bool"] += 1
-            elif is_datetime(cell) :
-                types["datetime"] += 1
-            else :
-                types["object"] += 1
+            match cell :
+                case int() :
+                    types["int"] += 1
+                case float() :
+                    types["float"] += 1
+                case bool() :
+                    types["bool"] += 1
+                case _ :
+                    if is_int(cell) :
+                        types["int"] += 1
+                    elif is_float(cell) :
+                        types["float"] += 1
+                    elif is_bool(cell) :
+                        types["bool"] += 1
+                    elif is_datetime(cell) :
+                        types["datetime"] += 1
+                    else :
+                        types["object"] += 1
         
         major_types = [key for (key, value) in types.items() if value/len(column) > typo_rate_threshold]
         if "object" in major_types or (len(major_types) >= 2 and not (len(major_types) == 2 and "int" in major_types and "float" in major_types)):
