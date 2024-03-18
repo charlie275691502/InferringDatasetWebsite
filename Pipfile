@@ -12,6 +12,7 @@ django-cors-headers = "*"
 drf-nested-routers = "*"
 xlrd = "*"
 openpyxl = "*"
+django-rest-swagger = "*"
 
 [dev-packages]
 
