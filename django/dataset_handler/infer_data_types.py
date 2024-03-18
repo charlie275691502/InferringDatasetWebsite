@@ -2,6 +2,7 @@ import datetime
 import pandas as pd
 from dateutil.parser import parse
 from .models import DatasetColumn
+from .timer import print_time
 
 def majority_infer(
         df: pd.DataFrame,
@@ -78,7 +79,6 @@ def majority_infer(
                         types["object"] += 1
         
         major_types = [key for (key, value) in types.items() if value/len(column) > typo_rate_threshold]
-        print(major_types)
         if "object" in major_types or (len(major_types) >= 2 and not (len(major_types) == 2 and "int" in major_types and "float" in major_types)):
             if len(list(set(column))) / len(column) < category_rate_threshold :
                 return DatasetColumn.TYPE_CATEGORY
@@ -94,7 +94,7 @@ def majority_infer(
             return DatasetColumn.TYPE_DATETIME
         return DatasetColumn.TYPE_TEXT
 
-    return [(col, get_column_type(df[col])) for col in df.columns]
+    return [(col, print_time(lambda: get_column_type(df[col]))) for col in df.columns]
 
 def get_names_and_types(df: pd.DataFrame) -> list[(str, str)]:
     return majority_infer(df)
