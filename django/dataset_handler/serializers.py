@@ -1,7 +1,8 @@
 import pathlib
 from rest_framework import serializers
+
+from .task import infer_data_type_task
 from .models import Dataset, DatasetColumn
-from .infer_data_types import get_names_and_types
 import pandas as pd
 import os
 
@@ -44,7 +45,7 @@ class DatasetSerializer(serializers.ModelSerializer):
 
         df = self.read_file(dataset.raw_file.path)
         
-        types = get_names_and_types(df)
+        types = infer_data_type_task(df)
         for idx, (name, type) in enumerate(types) :
             DatasetColumn.objects.create(index=idx, name=name, type=type, dataset_id=dataset.id)
         return dataset
@@ -53,7 +54,7 @@ class DatasetSerializer(serializers.ModelSerializer):
         return os.path.basename(dataset.raw_file.path)
     
     def get_data(self, dataset: Dataset):
-        return self.read_file(dataset.raw_file.path).values.tolist()
+        return self.read_file(dataset.raw_file.path).head(50).values.tolist()
 
     class Meta:
         model = Dataset
