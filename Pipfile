@@ -13,6 +13,8 @@ drf-nested-routers = "*"
 xlrd = "*"
 openpyxl = "*"
 django-rest-swagger = "*"
+celery = "*"
+redis = "*"
 
 [dev-packages]
 
