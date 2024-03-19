@@ -1,11 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
-from .views import DatasetViewSet, DatasetUploadViewSet, DatasetDownloadViewSet, DatasetColumnViewSet
+from .views import DatasetViewSet, DatasetUploadViewSet, DatasetDownloadViewSet, DatasetColumnViewSet, DatasetSummaryViewSet
 
 router = routers.DefaultRouter()
 router.register('datasets/upload', DatasetUploadViewSet, basename = 'dataset-upload')
 router.register('datasets/download', DatasetDownloadViewSet, basename = 'dataset-download')
+router.register('datasets/summary', DatasetSummaryViewSet, basename = 'dataset-summary')
 
 router.register('datasets', DatasetViewSet)
 columns_router = routers.NestedDefaultRouter(router, 'datasets', lookup='dataset')

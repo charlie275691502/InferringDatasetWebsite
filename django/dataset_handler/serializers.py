@@ -1,6 +1,6 @@
 import pathlib
 from rest_framework import serializers
-
+from django.db.models import Q
 from .task import infer_data_type_task
 from .models import Dataset, DatasetColumn
 import pandas as pd
@@ -33,7 +33,6 @@ class DatasetSerializer(serializers.ModelSerializer):
         elif extension == "xls" or extension == "xlsx" :
             df = pd.read_excel(fileName, dtype="string")
         return df.fillna('')
-
 
     def create(self, validated_data):
         raw_file = validated_data['raw_file']
@@ -69,3 +68,28 @@ class DatasetDownloadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dataset
         fields = ['id', 'file_name', 'raw_file']
+
+class DatasetSummarySerializer(serializers.ModelSerializer):
+    columns = serializers.SerializerMethodField(read_only=True, method_name='get_columns')
+    summaries = serializers.SerializerMethodField(read_only=True, method_name='get_summaries')
+
+    def read_file(self, fileName: str) -> pd.DataFrame :
+        extension = pathlib.Path(fileName).suffix[1:]
+        if extension == "csv" :
+            df = pd.read_csv(fileName)
+        elif extension == "xls" or extension == "xlsx" :
+            df = pd.read_excel(fileName)
+        return df.fillna('')
+    
+    def get_summaries(self, dataset: Dataset):
+        f = self.read_file(dataset.raw_file.path)
+        return f.describe().values.tolist()
+    
+    def get_columns(self, dataset: Dataset):
+        return DatasetColumnSerializer(DatasetColumn.objects
+                                       .filter(dataset_id=dataset.id)
+                                       .filter(Q(type=DatasetColumn.TYPE_INT) | Q(type=DatasetColumn.TYPE_FLOAT)).all(), read_only=True, many=True).data
+    
+    class Meta:
+        model = Dataset
+        fields = ['id', 'columns', 'summaries']
