@@ -70,8 +70,9 @@ class DatasetDownloadSerializer(serializers.ModelSerializer):
         fields = ['id', 'file_name', 'raw_file']
 
 class DatasetSummarySerializer(serializers.ModelSerializer):
+    file_name = serializers.SerializerMethodField(read_only=True, method_name='get_file_name')
     columns = serializers.SerializerMethodField(read_only=True, method_name='get_columns')
-    summaries = serializers.SerializerMethodField(read_only=True, method_name='get_summaries')
+    datas = serializers.SerializerMethodField(read_only=True, method_name='get_summaries')
 
     def read_file(self, fileName: str) -> pd.DataFrame :
         extension = pathlib.Path(fileName).suffix[1:]
@@ -81,15 +82,17 @@ class DatasetSummarySerializer(serializers.ModelSerializer):
             df = pd.read_excel(fileName)
         return df.fillna('')
     
-    def get_summaries(self, dataset: Dataset):
-        f = self.read_file(dataset.raw_file.path)
-        return f.describe().values.tolist()
+    def get_file_name(self, dataset: Dataset):
+        return os.path.basename(dataset.raw_file.path)
     
     def get_columns(self, dataset: Dataset):
         return DatasetColumnSerializer(DatasetColumn.objects
                                        .filter(dataset_id=dataset.id)
                                        .filter(Q(type=DatasetColumn.TYPE_INT) | Q(type=DatasetColumn.TYPE_FLOAT)).all(), read_only=True, many=True).data
     
+    def get_summaries(self, dataset: Dataset):
+        return self.read_file(dataset.raw_file.path).values.tolist()
+    
     class Meta:
         model = Dataset
-        fields = ['id', 'columns', 'summaries']
+        fields = ['id', 'file_name', 'columns', 'datas']
