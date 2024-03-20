@@ -19,11 +19,28 @@ class DatasetColumnSerializer(serializers.ModelSerializer):
         validated_data['type'] = {value: key for key, value in DatasetColumn.TYPE_CHOICES}.get(validated_data['get_type_display'], DatasetColumn.TYPE_INT)
         return super().update(instance, validated_data)
 
+class DatasetTableSerializer(serializers.ModelSerializer):
+    columns = DatasetColumnSerializer(read_only=True, many=True)
+    datas = serializers.SerializerMethodField(read_only=True, method_name='get_data')
+
+    def read_file(self, fileName: str) -> pd.DataFrame :
+        extension = pathlib.Path(fileName).suffix[1:]
+        if extension == "csv" :
+            df = pd.read_csv(fileName, dtype="string")
+        elif extension == "xls" or extension == "xlsx" :
+            df = pd.read_excel(fileName, dtype="string")
+        return df.fillna('')
+    
+    def get_data(self, dataset: Dataset):
+        return self.read_file(dataset.raw_file.path).head(50).values.tolist()
+
+    class Meta:
+        model = Dataset
+        fields = ['columns', 'datas']
 
 class DatasetSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField(read_only=True, method_name='get_file_name')
-    columns = DatasetColumnSerializer(read_only=True, many=True)
-    datas = serializers.SerializerMethodField(read_only=True, method_name='get_data')
+    table = serializers.SerializerMethodField(read_only=True, method_name='get_table')
     raw_file = serializers.FileField(write_only=True)
 
     def read_file(self, fileName: str) -> pd.DataFrame :
@@ -52,12 +69,12 @@ class DatasetSerializer(serializers.ModelSerializer):
     def get_file_name(self, dataset: Dataset):
         return os.path.basename(dataset.raw_file.path)
     
-    def get_data(self, dataset: Dataset):
-        return self.read_file(dataset.raw_file.path).head(50).values.tolist()
+    def get_table(self, dataset):
+        return DatasetTableSerializer(dataset).data
 
     class Meta:
         model = Dataset
-        fields = ['id', 'file_name', 'columns', 'datas', 'raw_file']
+        fields = ['id', 'file_name', 'table', 'raw_file']
 
 class DatasetDownloadSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField(read_only=True, method_name='get_file_name')
@@ -69,8 +86,8 @@ class DatasetDownloadSerializer(serializers.ModelSerializer):
         model = Dataset
         fields = ['id', 'file_name', 'raw_file']
 
-class DatasetSummarySerializer(serializers.ModelSerializer):
-    file_name = serializers.SerializerMethodField(read_only=True, method_name='get_file_name')
+class DatasetSummaryTableSerializer(serializers.ModelSerializer):
+    rows = serializers.SerializerMethodField(read_only=True, method_name='get_rows')
     columns = serializers.SerializerMethodField(read_only=True, method_name='get_columns')
     datas = serializers.SerializerMethodField(read_only=True, method_name='get_summaries')
 
@@ -82,8 +99,8 @@ class DatasetSummarySerializer(serializers.ModelSerializer):
             df = pd.read_excel(fileName)
         return df.fillna('')
     
-    def get_file_name(self, dataset: Dataset):
-        return os.path.basename(dataset.raw_file.path)
+    def get_rows(self, dataset: Dataset):
+        return ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
     
     def get_columns(self, dataset: Dataset):
         return DatasetColumnSerializer(DatasetColumn.objects
@@ -91,8 +108,22 @@ class DatasetSummarySerializer(serializers.ModelSerializer):
                                        .filter(Q(type=DatasetColumn.TYPE_INT) | Q(type=DatasetColumn.TYPE_FLOAT)).all(), read_only=True, many=True).data
     
     def get_summaries(self, dataset: Dataset):
-        return self.read_file(dataset.raw_file.path).values.tolist()
+        return self.read_file(dataset.raw_file.path).describe().values.tolist()
+
+    class Meta:
+        model = Dataset
+        fields = ['rows', 'columns', 'datas']
+
+class DatasetSummarySerializer(serializers.ModelSerializer):
+    file_name = serializers.SerializerMethodField(read_only=True, method_name='get_file_name')
+    table = serializers.SerializerMethodField(read_only=True, method_name='get_table')
+    
+    def get_file_name(self, dataset: Dataset):
+        return os.path.basename(dataset.raw_file.path)
+    
+    def get_table(self, dataset):
+        return DatasetSummaryTableSerializer(dataset).data
     
     class Meta:
         model = Dataset
-        fields = ['id', 'file_name', 'columns', 'datas']
+        fields = ['id', 'file_name', 'table']
