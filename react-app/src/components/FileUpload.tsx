@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 
-interface Prop {
+interface Props {
   onUpload: (file: File) => void;
 }
 
-const FileUpload = ({ onUpload }: Prop) => {
+const FileUpload = ({ onUpload }: Props) => {
   let [selectedFile, setSelectedFile] = useState<File | null>(null);
   return (
     <div className="input-group">
