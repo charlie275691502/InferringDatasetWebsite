@@ -1,11 +1,21 @@
-import React from "react";
 import Button from "./Button";
+import { domain } from "../App";
+import { FileDownload, GetRequest } from "../modules/Request";
 
-const ActionSubPage = () => {
+interface Props {
+  datasetId: number;
+}
+
+const ActionSubPage = ({ datasetId }: Props) => {
+  const downloadFile = () =>
+    GetRequest(
+      `${domain}/dataset_handler/datasets/download/${datasetId}/`,
+      (response) => FileDownload(response.raw_file, response.file_name)
+    );
+
   return (
     <>
-      <div>ActionSubPage</div>
-      {/* <Button text="Download" onClickButton={() => downloadFile(74)} /> */}
+      <Button text="Download" onClickButton={() => downloadFile()} />
     </>
   );
 };

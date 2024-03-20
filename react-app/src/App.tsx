@@ -34,12 +34,6 @@ function App() {
     setPageName(pageNames[index]);
   };
 
-  const downloadFile = () =>
-    GetRequest(
-      `${domain}/dataset_handler/datasets/download/${datasetId}/`,
-      (response) => FileDownload(response.raw_file, response.file_name)
-    );
-
   const uploadFile = (file: File) =>
     PostRequest(
       `${domain}/dataset_handler/datasets/upload/`,
@@ -90,7 +84,7 @@ function App() {
           case pageNames[1]:
             return <SummarySubPage data={summaryData} />;
           case pageNames[2]:
-            return <ActionSubPage />;
+            return <ActionSubPage datasetId={datasetId} />;
         }
       })()}
     </div>
