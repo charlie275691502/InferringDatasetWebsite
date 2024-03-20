@@ -1,31 +1,18 @@
-import React, { useReducer, useState } from "react";
-import {
-  FileDownload,
-  GetRequest,
-  PostRequest,
-  PutRequest,
-} from "../modules/Request";
-import DatasetTable, { Data } from "./DatasetTable";
-import Button from "./Button";
-import FileUpload from "./FileUpload";
+import { Data } from "../App";
+import DatasetTable from "./DatasetTable";
 
 interface Props {
   data: Data | null;
-  onUpload: (file: File) => void;
-  onDropdownElementSelect: (
-    dataset_id: number,
-    column_id: number,
-    element: string
-  ) => void;
+  onDropdownElementSelect: (column_id: number, element: string) => void;
 }
 
-const RawDataSubPage = ({ data, onUpload, onDropdownElementSelect }: Props) => {
+const RawDataSubPage = ({ data, onDropdownElementSelect }: Props) => {
   return (
     <div>
-      <FileUpload onUpload={onUpload} />
       {data && (
         <DatasetTable
-          data={data}
+          table={data.table}
+          showDropdown={true}
           onDropdownElementSelect={onDropdownElementSelect}
         />
       )}

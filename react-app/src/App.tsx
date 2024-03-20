@@ -8,22 +8,35 @@ import {
   PostRequest,
   PutRequest,
 } from "./modules/Request";
-import { Data } from "./components/DatasetTable";
+import { Table } from "./components/DatasetTable";
 import ActionSubPage from "./components/ActionSubPage";
+import FileUpload from "./components/FileUpload";
+
+export interface Data {
+  id: number;
+  file_name: string;
+  table: Table;
+}
+
+export const domain = "http://127.0.0.1:9000";
 
 function App() {
-  const domain = "http://127.0.0.1:9000";
   const pageNames = ["Raw Data", "Summary", "Action"];
-  let [pageName, setPageName] = useState<string>();
+
+  let [pageName, setPageName] = useState<string>(pageNames[0]);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  let [datasetId, setDatasetId] = useState<number>(-1);
+  let [fileName, setFileName] = useState<string>();
+  let [rawData, setRawData] = useState<Data | null>(null);
+  let [summaryData, setRummaryData] = useState<Data | null>(null);
+
   let onSelectPage = (index: number) => {
     setPageName(pageNames[index]);
   };
-  let [data, setData] = useState<Data | null>(null);
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  const downloadFile = (dataset_id: number) =>
+  const downloadFile = () =>
     GetRequest(
-      `${domain}/dataset_handler/datasets/download/${dataset_id}/`,
+      `${domain}/dataset_handler/datasets/download/${datasetId}/`,
       (response) => FileDownload(response.raw_file, response.file_name)
     );
 
@@ -31,19 +44,25 @@ function App() {
     PostRequest(
       `${domain}/dataset_handler/datasets/upload/`,
       { raw_file: file },
-      (response) => setData(response)
+      (response) => {
+        setRawData(response);
+        setDatasetId(response.id);
+        setFileName(response.file_name);
+        GetRequest(
+          `${domain}/dataset_handler/datasets/summary/${response.id}/`,
+          (response) => setRummaryData(response)
+        );
+      }
     );
 
-  const selectDropdownElement = (
-    dataset_id: number,
-    column_id: number,
-    element: string
-  ) =>
+  const selectDropdownElement = (column_id: number, element: string) =>
     PutRequest(
-      `${domain}/dataset_handler/datasets/${dataset_id}/columns/${column_id}/`,
+      `${domain}/dataset_handler/datasets/${datasetId}/columns/${column_id}/`,
       { type: element },
       (response) => {
-        let column = data?.columns?.find((column) => column.id == response.id);
+        let column = rawData?.table?.columns?.find(
+          (column) => column.id == response.id
+        );
         if (column) column.type = response.type;
         forceUpdate();
       }
@@ -51,18 +70,29 @@ function App() {
 
   return (
     <div>
+      {(() => {
+        if (datasetId == -1) {
+          return <FileUpload onUpload={uploadFile} />;
+        } else {
+          return <h3>{fileName}</h3>;
+        }
+      })()}
       <Tabs pageNames={pageNames} onSelectPage={onSelectPage} />
-      {pageName == pageNames[0] ? (
-        <RawDataSubPage
-          data={data}
-          onUpload={uploadFile}
-          onDropdownElementSelect={selectDropdownElement}
-        />
-      ) : pageName == pageNames[1] ? (
-        <SummarySubPage />
-      ) : (
-        <ActionSubPage />
-      )}
+      {(() => {
+        switch (pageName) {
+          case pageNames[0]:
+            return (
+              <RawDataSubPage
+                data={rawData}
+                onDropdownElementSelect={selectDropdownElement}
+              />
+            );
+          case pageNames[1]:
+            return <SummarySubPage data={summaryData} />;
+          case pageNames[2]:
+            return <ActionSubPage />;
+        }
+      })()}
     </div>
   );
 }

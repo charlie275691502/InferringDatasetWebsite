@@ -6,12 +6,12 @@ interface Props {
 }
 
 const Tabs = ({ pageNames, onSelectPage }: Props) => {
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   return (
     <ul className="nav nav-tabs">
       {pageNames.map((pageName, index) => (
-        <li className="nav-item">
+        <li className="nav-item" key={index}>
           <a
             className={selectedIndex == index ? "nav-link active" : "nav-link"}
             href="#"

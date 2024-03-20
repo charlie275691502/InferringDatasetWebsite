@@ -8,23 +8,23 @@ export interface Column {
   type: string;
 }
 
-export interface Data {
-  id: number;
-  file_name: string;
+export interface Table {
+  rows: string[];
   columns: Column[];
   datas: object[][];
 }
 
 interface Props {
-  data: Data;
-  onDropdownElementSelect: (
-    dataset_id: number,
-    column_id: number,
-    element: string
-  ) => void;
+  table: Table;
+  showDropdown: boolean;
+  onDropdownElementSelect: (column_id: number, element: string) => void;
 }
 
-const DatasetTable = ({ data, onDropdownElementSelect }: Props) => {
+const DatasetTable = ({
+  table,
+  showDropdown,
+  onDropdownElementSelect,
+}: Props) => {
   const elements = [
     "Integer",
     "Float",
@@ -36,12 +36,11 @@ const DatasetTable = ({ data, onDropdownElementSelect }: Props) => {
 
   return (
     <>
-      <h1>{data.file_name}</h1>
       <table className="table">
         <thead>
           <tr>
             <th scope="col" key="-"></th>
-            {data.columns.map((column, index) => (
+            {table.columns.map((column, index) => (
               <th scope="col" key={index}>
                 {column.name}
               </th>
@@ -49,25 +48,31 @@ const DatasetTable = ({ data, onDropdownElementSelect }: Props) => {
           </tr>
           <tr key="1">
             <th scope="col" key="-"></th>
-            {data.columns.map((column, index) => (
+            {table.columns.map((column, index) => (
               <th scope="col" key={index}>
-                {
+                {showDropdown ? (
                   <Dropdown
                     elements={elements}
                     selectedElement={column.type}
                     onElementSelect={(element: string) =>
-                      onDropdownElementSelect(data.id, column.id, element)
+                      onDropdownElementSelect(column.id, element)
                     }
                   />
-                }
+                ) : (
+                  <p>column.type</p>
+                )}
               </th>
             ))}
           </tr>
         </thead>
         <tbody className="table-group-divider">
-          {data.datas.map((row, index) => (
+          {table.datas.map((row, index) => (
             <tr key={index}>
-              <th scope="row">{(index + 1).toString()}</th>
+              <th scope="row">
+                {table.rows == null || table.rows.length < index
+                  ? (index + 1).toString()
+                  : table.rows[index]}
+              </th>
               {row.map((cell, jndex) => (
                 <td key={jndex}>{String(cell)}</td>
               ))}

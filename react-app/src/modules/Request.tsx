@@ -12,7 +12,6 @@ export function GetRequest(url: string, onReceive: (response: any) => void) {
   axios
     .get(url)
     .then((response) => {
-      console.log(response.data);
       onReceive(response.data);
     })
     .catch((error) => {
