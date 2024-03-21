@@ -18,11 +18,15 @@ run the command below or manually start the redis service in Docker
 run the command below. Celery is used to ayschronizing the data type infer tasks.                            
 `celery -A main worker -l info -P solo`
 
-## 4. Start Django Server
+## 4. Setup the Database
+If you are using VSCode, you can install the sqllite extensions.                     
+If not, you may need to setup your own database on your machine.
+
+## 5. Start Django Server
 Go to the `{project_root}/django/` folder, run the command to start server                                    
 `python manage.py runserver 9000`
 
-## 5. Run React
+## 6. Run React
 Go to the `{project_root}/react-app/` folder, run the command to start react service                                    
 `npm run dev`               
 Then you can go to your browser and chech                         
